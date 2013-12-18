@@ -4,6 +4,12 @@
 		{{#inStart}}
 			<p>inStart</p>
 		{{/inStart}}
+		{{^inStart}}
+			<p>inStart else</p>
+		{{/inStart}}
+		{{^inStart}}
+			<p>inStart else1</p>
+		{{/inStart}}
 	{{/start}}
 	<span>sometext</span>
 	{{#inStart}}
