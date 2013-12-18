@@ -52,7 +52,6 @@ exports.init = function (grunt) {
                             keyArray[i][1] += 1;
                             this.keyIndex = this.keyArray[i][1];
                             found =true;
-                            console.log("found:" +this.keyIndex);
                             break;
                         };
                     }
@@ -62,33 +61,31 @@ exports.init = function (grunt) {
                         newKey[0] = key;
                         newKey[1] = 0;
                         this.keyArray.push(newKey);
-                        console.log(this.keyArray);
                     };
                 };
             };
 
             var replace_template = function (contentArray,currentIndex,keyArray){
                 var content=contentArray[currentIndex][1];
-                var tokens = content.match(/{{#[a-zA-Z]*}}/g);
+                var tokens = content.match(/{{((\^)|#)[a-zA-Z_-]*}}/g);
                 if (tokens == null) return contentArray;
                 for (var i=0; i<tokens.length;i++){
+                    var elseKey= "";
+                    if (tokens[i][2] == "^") elseKey = "_else";
                     var startIndex = content.indexOf(tokens[i]);
                     if (startIndex >0){
-                        var endToken =tokens[i].toString().replace("#","\/");
+                        var endToken = "{{/" + tokens[i].substring(3, tokens[i].length);
                         var endIndex = content.indexOf(endToken);
-                        var tokenLength =tokens[i].toString().length;
-                        var token=tokens[i].toString().replace("#","");
-                        var key = token.replace("{{","").replace("}}","");
-                        var keyString = content.substring(startIndex+tokenLength,endIndex);
-                       
+                        var key=tokens[i].substring(3,tokens[i].length-2)+elseKey;
+                        var token = "{{"+key+"}}";
+
+                        var keyString = content.substring(startIndex+tokens[i].length,endIndex);
                         var updateKey= new get_key_index(keyArray,key);
                         updateKey.updateKeyArray();
                         var keyIndex = updateKey.keyIndex;
                         var updateKeyArray = updateKey.keyArray;
 
                         var newKeyPair = new Array(2);
-
-
                         if (keyIndex >0 ){
                             key = key + keyIndex;
                             token = "{{" + key + "}}";
@@ -98,7 +95,8 @@ exports.init = function (grunt) {
 
                         contentArray.push(newKeyPair);
                    
-                        content = content.substring(0,startIndex) + token + content.substring(endIndex+tokenLength, content.length);
+                        content = content.substring(0,startIndex) + token + content.substring(endIndex+tokens[i].length, content.length);
+
                     };
                 }
                 contentArray[currentIndex][1]= content;
