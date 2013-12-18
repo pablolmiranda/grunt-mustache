@@ -33,7 +33,8 @@ exports.init = function (grunt) {
                     return filename;
                 }
                 var file_extension = '.' + extension;
-                return filename.split(file_extension)[0];
+                //return filename.split(file_extension)[0];
+                 return filename.split(file_extension)[0].replace(/-/g, "_");
             };
 
             var replace_single_quotes = function (content) {
@@ -73,7 +74,7 @@ exports.init = function (grunt) {
                     var elseKey= "";
                     if (tokens[i][2] == "^") elseKey = "_else";
                     var startIndex = content.indexOf(tokens[i]);
-                    if (startIndex >0){
+                    if (startIndex >=0){
                         var endToken = "{{/" + tokens[i].substring(3, tokens[i].length);
                         var endIndex = content.indexOf(endToken);
                         var key=tokens[i].substring(3,tokens[i].length-2)+elseKey;
@@ -94,12 +95,11 @@ exports.init = function (grunt) {
                         newKeyPair[1]=keyString;
 
                         contentArray.push(newKeyPair);
-                   
                         content = content.substring(0,startIndex) + token + content.substring(endIndex+tokens[i].length, content.length);
-
                     };
                 }
                 contentArray[currentIndex][1]= content;
+                
                 for (var i=currentIndex+1; i<contentArray.length;i++){
                     contentArray = replace_template(contentArray,i,updateKeyArray);
                 }
@@ -122,9 +122,8 @@ exports.init = function (grunt) {
                 templateCount += 1;
                 var file_content = grunt.file.read(abspath);
                 file_content = replace_single_quotes(file_content);
-               
-                var start = file_content.match(/{{#[a-zA-Z]*}}/);
-                
+                var start = file_content.match(/{{((\^)|#)[a-zA-Z_-]*}}/g);
+
                 if (start !=null){
                     var contentArray = new Array();
                     var basePair = new Array('base',file_content);
